@@ -35,7 +35,7 @@ export class PollsService {
 		const userID = createUserID();
 		this.logger.debug(`Fetching poll with ID: ${fields.pollID} for user with ID: ${userID}`);
 		const joinedPoll = await this.pollsRepository.getPoll(fields.pollID);
-		this.logger.debug(`Creating token string for pollID: ${joinedPoll.id} and userId: ${userID}`);
+		this.logger.debug(`Creating token string for pollID: ${joinedPoll.id} and userID: ${userID}`);
 		const signedString = this.jwtService.sign(
 			{
 				pollID: joinedPoll.id,
