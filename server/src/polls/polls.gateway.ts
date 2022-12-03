@@ -1,9 +1,13 @@
-import { Logger } from '@nestjs/common';
-import { OnGatewayInit, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
+import { BadRequestException, Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { OnGatewayInit, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, SubscribeMessage, WsException } from '@nestjs/websockets';
 import { Namespace } from 'socket.io';
+import { WsCatchAllFilter } from 'src/exceptions/ws-catch-all-filters';
+import { WsBadRequestException } from 'src/exceptions/ws-exceptions';
 import { PollsService } from './polls.service';
 import { SocketWithAuth } from './types';
 
+@UsePipes(new ValidationPipe())
+@UseFilters(new WsCatchAllFilter())
 @WebSocketGateway({ namespace: 'polls' })
 export class PollsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private readonly logger = new Logger(PollsGateway.name);
@@ -29,5 +33,10 @@ export class PollsGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		this.logger.log(`Disconnected socket id: ${client.id}`);
 		this.logger.debug(`Number of connected sockets: ${sockets.size}`);
 		//TODO - remove client from poll and send participants_updated event to remaining clients
+	}
+
+	@SubscribeMessage('test')
+	async test() {
+		throw new BadRequestException({ test: 'test' });
 	}
 }
