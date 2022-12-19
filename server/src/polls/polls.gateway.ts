@@ -11,6 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { Namespace } from 'socket.io';
 import { WsCatchAllFilter } from 'src/exceptions/ws-catch-all-filters';
+import { CLIENT_RENEG_WINDOW } from 'tls';
 import { NominationDto } from './dtos';
 import { GatewayAdminGuard } from './gateway-admin.guard';
 import { PollsService } from './polls.service';
@@ -123,4 +124,11 @@ export class PollsGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		this.io.to(client.pollID).emit('poll_updated', updatedPoll);
 	}
 
+	@UseGuards(GatewayAdminGuard)
+	@SubscribeMessage('close_poll')
+	async closePoll(@ConnectedSocket() client: SocketWithAuth): Promise<void> {
+		this.logger.debug(`Closing poll: ${client.pollID} and computing results`);
+		const updatedPoll = await this.pollsService.computeResults(client.pollID);
+		this.io.to(client.pollID).emit('poll_cancelled');
+	}
 }
