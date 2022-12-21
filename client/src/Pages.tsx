@@ -5,11 +5,13 @@ import Create from './pages/Create';
 import Join from './pages/Join'
 import { AppPage, state } from './state';
 import { useSnapshot } from 'valtio';
+import { WaitingRoom } from './pages/WaitingRoom';
 
 const routeConfig = {
 	[AppPage.Welcome]: Welcome,
 	[AppPage.Create]: Create,
-	[AppPage.Welcome]: Join,
+	[AppPage.Join]: Join,
+	[AppPage.WaitingRoom]: WaitingRoom,
 };
 
 const Pages: React.FC = () => {
@@ -21,10 +23,10 @@ const Pages: React.FC = () => {
 					key={page}
 					in={page === currentState.currentPage}
 					timeout={300}
-					classNames='page'
+					classNames="page"
 					unmountOnExit
 				>
-					<div className='page mobile-height max-w-screen-sm mx-auto py-8 px-4 overflow-y-auto'>
+					<div className="page mobile-height max-w-screen-sm mx-auto py-8 px-4 overflow-y-auto">
 						<Component />
 					</div>
 				</CSSTransition>
