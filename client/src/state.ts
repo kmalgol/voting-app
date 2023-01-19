@@ -3,6 +3,7 @@ import { Poll } from 'shared';
 import { Socket } from 'socket.io-client';
 import { proxy, ref } from 'valtio';
 import { subscribeKey } from 'valtio/utils';
+import { Voting } from './pages/Voting';
 import { createSocketWithHandlers, socketIOUrl } from './socket-io';
 import { getTokenPayload } from './util';
 
@@ -10,7 +11,8 @@ export enum AppPage {
 	Welcome = 'welcome',
 	Create = 'create',
 	Join = 'join',
-	WaitingRoom = 'waiting-room'
+	WaitingRoom = 'waiting-room',
+	Voting = 'voting',
 };
 
 type Me = {
@@ -100,9 +102,15 @@ const actions = {
 				state,
 				actions
 			}));
-		} else {
-			state.socket.connect();
+			return;
 		}
+
+		if (!state.socket.connected) {
+			state.socket.connect();
+			return;
+		}
+
+		actions.stopLoading();
 	},
 	updatePoll: (poll: Poll): void => {
 		state.poll = poll;
@@ -131,6 +139,12 @@ const actions = {
 	},
 	startVote: (): void => {
 		state.socket?.emit('start_vote');
+	},
+	submitRankings: (rankings: string[]): void => {
+		state.socket?.emit('submit_rankings', { rankings });
+	},
+	cancelPoll: (): void => {
+		state.socket?.emit('cancel_poll')
 	},
 	addWsError: (error: WsError): void => {
 		state.wsErrors = [...state.wsErrors, { ...error, id: nanoid(6) }];
